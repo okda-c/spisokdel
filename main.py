@@ -26,23 +26,23 @@ def start(message):
     markup.row(newtask_btn, todolist_btn)
     bot.send_message(message.chat.id, "Привет! Что нужно сделать?", reply_markup=markup)
 
+
 def add_new_task(message):
     bot.send_message(message.chat.id, "Введите название задачи")
+
 
 @bot.message_handler(commands=["newtask"])
 def new_task(message):
     add_new_task(message)
 
 
-
-
-
 def print_todolist(message):
     bot.send_message(message.chat.id, "Вот твой список дел: ")
     text_list = ""
     for i, task in enumerate(todolist):
-        text_list += f" задача №{i+1}: {task.name}\n{task.day} {task.time}\n"
+        text_list += f" задача №{i + 1}: {task.name}\n{task.day} {task.time}\n"
     bot.send_message(message.chat.id, text_list)
+
 
 @bot.message_handler(commands=["todolist"])
 def list(message):
@@ -54,7 +54,6 @@ def help(message):
     bot.send_message(message.chat.id, "Привет! Вот список доступных команд: \n /start - начало работы")
 
 
-
 @bot.message_handler(content_types=["text"])
 def answer(message):
     if message.text == BUTTONS[0]:
@@ -64,7 +63,7 @@ def answer(message):
     else:
         newtask = Task(message.text)
         todolist.append(newtask)
-        bot.send_message(message.chat.id,f"Добавлена задача \n {newtask.name}")
+        bot.send_message(message.chat.id, f"Добавлена задача \n {newtask.name}")
         keyboard = types.InlineKeyboardMarkup(row_width=2)
         keyboard_buttons = []
         for day in WEEK_BUTTONS:
@@ -73,9 +72,11 @@ def answer(message):
         keyboard.add(*keyboard_buttons)
         bot.send_message(message.chat.id, "Выберите день начала задачи", reply_markup=keyboard)
 
+
 @bot.callback_query_handler(func=lambda call: True)
 def day_select(call):
     if len(todolist) > 0:
         todolist[-1].day = call.data
+
 
 bot.polling(none_stop=True, interval=0)
