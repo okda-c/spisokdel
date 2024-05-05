@@ -4,6 +4,8 @@ from telebot import types
 BUTTONS = ["Новая задача", "Список дел"]
 todolist = []
 WEEK_BUTTONS = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+TIME_START = 7
+TIME_END = 21
 
 
 class Task:
@@ -71,12 +73,31 @@ def answer(message):
             keyboard_buttons.append(day_btn)
         keyboard.add(*keyboard_buttons)
         bot.send_message(message.chat.id, "Выберите день начала задачи", reply_markup=keyboard)
+        keyboard_time = types.InlineKeyboardMarkup(row_width=5)
+        keyboard_buttons_time = []
+        for time in range(TIME_START,TIME_END+1):
+            time_text = f"{time}:00"
+            time_btn = types.InlineKeyboardButton(time_text,callback_data=time_text)
+            keyboard_buttons_time.append(time_btn)
+        keyboard_time.add(*keyboard_buttons_time)
+        bot.send_message(message.chat.id,"Выберете время начала задачи",reply_markup=keyboard_time)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def day_select(call):
     if len(todolist) > 0:
         todolist[-1].day = call.data
+    bot.edit_message_text(f"запланирована на {call.data}",call.message.chat.id, call.message.message_id)
+    bot.answer_callback_query(call.id)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def time_select(call):
+    if len(todolist) > 0:
+        todolist[-1].time = call.data
+    bot.edit_message_text(f"запланирована на {call.data}",call.message.chat.id,call.message.message_id)
+
+
 
 
 bot.polling(none_stop=True, interval=0)
